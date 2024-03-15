@@ -1,4 +1,4 @@
-module iborchestrator
+module snoman
 
 go 1.22.1
 

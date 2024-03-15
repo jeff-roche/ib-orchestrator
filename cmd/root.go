@@ -11,7 +11,7 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "ibo",
+	Use:   "snoman",
 	Short: "foobar",
 	Long:  `foobar`,
 	// Uncomment the following line if your bare application

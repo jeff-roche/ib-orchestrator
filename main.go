@@ -1,6 +1,6 @@
 package main
 
-import "iborchestrator/cmd"
+import "snoman/cmd"
 
 func main() {
 	cmd.Execute()

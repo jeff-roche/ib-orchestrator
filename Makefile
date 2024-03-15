@@ -1,5 +1,5 @@
 MAIN_PACKAGE_PATH := .
-BINARY_NAME := ibo
+BINARY_NAME := snoman
 
 .PHONY: no-dirty
 no-dirty:
