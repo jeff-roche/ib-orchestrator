@@ -7,16 +7,29 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
+
+var logger *zap.SugaredLogger
+
+// verbose is the optional command that will display INFO logs
+var verbose bool
+
+// jsonOutput is the optional command that will display logs as JSON
+var jsonOutput bool
+
+// version is an optional command that will display the current release version
+var releaseVersion string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "snoman",
-	Short: "foobar",
-	Long:  `foobar`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Use:     "snoman",
+	Version: releaseVersion,
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		zaplog := createLogger(verbose, jsonOutput)
+		logger = zaplog.Sugar()
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -26,16 +39,33 @@ func Execute() {
 	if err != nil {
 		os.Exit(1)
 	}
+
+	logger.Sync()
 }
 
 func init() {
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
+	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Display verbose logs")
+	rootCmd.PersistentFlags().BoolVar(&jsonOutput, "json", false, "Format the log output as JSON")
 
-	// rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.iborchestrator.yaml)")
+	initCreateCmd()
+}
 
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+func createLogger(beVerbose bool, useJson bool) *zap.Logger {
+	logCfg := zap.NewProductionConfig()
+	logCfg.DisableStacktrace = true
+
+	if !useJson {
+		logCfg.Encoding = "console" // "json" is the default in production configs
+	}
+
+	if beVerbose {
+		logCfg.Level = zap.NewAtomicLevelAt(zap.DebugLevel) // Info is the default in production config
+		logCfg.DisableStacktrace = false                    // We probably want this data for debugging
+	}
+
+	// Set the time format to iso8601 timestamp format
+	logCfg.EncoderConfig.TimeKey = "timestamp"
+	logCfg.EncoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
+
+	return zap.Must(logCfg.Build())
 }
