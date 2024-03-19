@@ -35,7 +35,7 @@ var generateNetCmd = &cobra.Command{
 	Long: `
 	Generate a libvirt network spec
 
-	If --from-xml or --from-yaml are not specified, the default configuration will be used
+	If --from-xml or --from are not specified, the default configuration will be used
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		outputXML, _ := cmd.Flags().GetBool("xml")
