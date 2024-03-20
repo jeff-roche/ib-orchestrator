@@ -45,7 +45,7 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Display verbose logs")
-	rootCmd.PersistentFlags().BoolVar(&jsonOutput, "json", false, "Format the log output as JSON")
+	rootCmd.PersistentFlags().BoolVar(&jsonOutput, "log-json", false, "Format the log output as JSON")
 
 	initCreateCmd()
 	initDestroyCmd()
