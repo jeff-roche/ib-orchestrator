@@ -19,6 +19,7 @@ func CreateVirtualMachine(spec *VirtualMachineSpec) error {
 	}
 	defer lvc.Close()
 
+	// Create the network for the VM
 	err = network.Create(spec.Network)
 	if err != nil {
 		return fmt.Errorf("unable to create vm network: %w", err)

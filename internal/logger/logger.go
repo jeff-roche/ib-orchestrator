@@ -34,6 +34,7 @@ func Set(beVerbose bool, useJson bool) *zap.SugaredLogger {
 
 	if beVerbose {
 		// Set the log level so we get debug logs
+		// this is dynamic and if we set it before creating the logger, it does not stick
 		logCfg.Level.SetLevel(zapcore.DebugLevel)
 	}
 
