@@ -10,13 +10,13 @@ import (
 )
 
 var ErrNotImplemented = fmt.Errorf("command not yet implemented")
-var ErrResourcetTypeNotSpecified = fmt.Errorf("you must specify the resource type")
+var ErrResourceTypeNotSpecified = fmt.Errorf("you must specify the resource type")
 
 var createCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create the specified resource",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Fatalf("Error executing create command: %v", ErrResourcetTypeNotSpecified)
+		logger.Fatalf("Error executing create command: %v", ErrResourceTypeNotSpecified)
 	},
 }
 
@@ -37,8 +37,16 @@ var createVmCmd = &cobra.Command{
 	Use:   "vm",
 	Short: "Create an OCP VM locally",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := machines.CreateVirtualMachine(machines.GetDefaultVirtualMachineSpec())
+		spec := machines.GetDefaultVirtualMachineSpec()
+		host := spec.Network.Hosts[0]
+		spec.Network.Hosts = nil
+
+		err := machines.CreateVirtualMachine(spec)
 		if err != nil {
+			logger.Error(err)
+		}
+
+		if err := network.AddHostToNetwork(spec.Network.UUID, &host); err != nil {
 			logger.Error(err)
 		}
 	},

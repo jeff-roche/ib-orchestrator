@@ -10,7 +10,7 @@ var destroyCmd = &cobra.Command{
 	Use:   "destroy",
 	Short: "Destroy the specified resource",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Fatalf("Error executing destroy command: %v", ErrResourcetTypeNotSpecified)
+		logger.Fatalf("Error executing destroy command: %v", ErrResourceTypeNotSpecified)
 	},
 }
 

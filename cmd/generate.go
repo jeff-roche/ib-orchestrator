@@ -13,7 +13,7 @@ var generateCmd = &cobra.Command{
 	Use:   "generate",
 	Short: "Generate the specified resource config",
 	Run: func(cmd *cobra.Command, args []string) {
-		logger.Fatalf("Error executing the generate command: %v", ErrResourcetTypeNotSpecified)
+		logger.Fatalf("Error executing the generate command: %v", ErrResourceTypeNotSpecified)
 	},
 }
 
@@ -27,6 +27,7 @@ func initGenerateCmd() {
 
 	// Generate network configuration
 	generateCmd.AddCommand(generateNetCmd)
+	generateNetCmd.Flags().String("from-net", "", "Name or UUID of the libvirt network to use as a base")
 	generateNetCmd.Flags().String("from-xml", "", "Path to the XML file to use for spec generation")
 	generateNetCmd.Flags().String("from", "", "Path to the spec file to use for spec generation. This will just sanitize the input.")
 	generateNetCmd.Flags().Bool("xml", false, "Generate the libvirt xml config for the network")
@@ -82,12 +83,13 @@ var generateNetCmd = &cobra.Command{
 		outputXML, _ := cmd.Flags().GetBool("xml")
 		source, _ := cmd.Flags().GetString("from")
 		xmlSource, _ := cmd.Flags().GetString("from-xml")
+		netSource, _ := cmd.Flags().GetString("from-net")
 
 		var spec *network.VirtualMachineNetworkSpec
 		if source != "" {
 			data, err := os.ReadFile(source)
 			if err != nil {
-				logger.Fatalf("unable to read the spec file: %w", err)
+				logger.Fatalf("unable to read the spec file: %v", err)
 			}
 
 			spec = &network.VirtualMachineNetworkSpec{}
@@ -95,11 +97,17 @@ var generateNetCmd = &cobra.Command{
 		} else if xmlSource != "" {
 			data, err := os.ReadFile(xmlSource)
 			if err != nil {
-				logger.Fatalf("unable to read the xml file: %w", err)
+				logger.Fatalf("unable to read the xml file: %v", err)
 			}
 
 			spec = &network.VirtualMachineNetworkSpec{}
 			spec.UnmarshalXML(data)
+		} else if netSource != "" {
+			var err error
+			spec, err = network.Find(netSource)
+			if err != nil {
+				logger.Fatalf("could not generate spec from network: %v", err)
+			}
 		} else {
 			spec = network.GetDefaultVirtualMachineNetworkSpec()
 		}

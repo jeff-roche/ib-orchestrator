@@ -10,7 +10,7 @@ import (
 
 type VirtualMachineSpec struct {
 	Name    string                             `yaml:"name" validate:"required"`
-	Network *network.VirtualMachineNetworkSpec `yaml:"network"`
+	Network *network.VirtualMachineNetworkSpec `yaml:"network,omitempty" validate:"omitempty"`
 }
 
 const (
@@ -18,10 +18,12 @@ const (
 )
 
 func GetDefaultVirtualMachineSpec() *VirtualMachineSpec {
-	return &VirtualMachineSpec{
+	spec := &VirtualMachineSpec{
 		Name:    DEFAULT_VM_NAME,
 		Network: network.GetDefaultVirtualMachineNetworkSpec(),
 	}
+
+	return spec
 }
 
 func (spec VirtualMachineSpec) Validate() error {

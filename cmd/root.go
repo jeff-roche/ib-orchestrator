@@ -50,4 +50,5 @@ func init() {
 	initCreateCmd()
 	initDestroyCmd()
 	initGenerateCmd()
+	initRunCmd()
 }
