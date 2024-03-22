@@ -21,3 +21,10 @@
 go.work
 
 bin
+
+logs
+*.log
+
+workdir*
+
+.env

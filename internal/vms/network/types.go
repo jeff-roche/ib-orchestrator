@@ -14,38 +14,42 @@ import (
 type VMNet_DHCP_Host struct {
 	Name       string `yaml:"name" validate:"required"`
 	MacAddress string `yaml:"mac_address,omitempty" validate:"omitempty,mac"`
-	IpAddress  string `yaml:"ip_address,omitempty" validate:"ip,omitempty"`
+	IpAddress  string `yaml:"ip_address,omitempty" validate:"omitempty,ip"`
 }
 
 type VirtualMachineNetworkSpec struct {
-	Name       string            `yaml:"name" validate:"required"`
-	UUID       string            `yaml:"UUID,omitempty" validate:"omitempty,uuid"`
-	BridgeName string            `yaml:"bridge" validate:"required"`
-	MacAddress string            `yaml:"mac_address,omitempty" validate:"omitempty,mac"`
-	CIDR       string            `yaml:"cidr" validate:"required,cidr"`
-	Domain     string            `yaml:"domain" validate:"required,fqdn"`
-	Hosts      []VMNet_DHCP_Host `yaml:"hosts,omitempty" validate:"omitempty"`
-	prefix     string
+	Name                  string            `yaml:"name" validate:"required"`
+	UUID                  string            `yaml:"UUID,omitempty" validate:"omitempty,uuid"`
+	BridgeName            string            `yaml:"bridge" validate:"required"`
+	MacAddress            string            `yaml:"mac_address,omitempty" validate:"omitempty,mac"`
+	CIDR                  string            `yaml:"cidr" validate:"required,cidr"`
+	Domain                string            `yaml:"domain" validate:"required,fqdn"`
+	Hosts                 []VMNet_DHCP_Host `yaml:"hosts,omitempty" validate:"omitempty"`
+	ClusterNetworkCIDR    string            `yaml:"cluster_cidr,omitempty" validate:"omitempty,cidr"`
+	ClusterSvcNetworkCIDR string            `yaml:"cluster_svc_cidr,omitempty" validate:"omitempty,cidr"`
+	prefix                string
 }
 
 const (
-	DEFAULT_NETWORK_NAME        string = "sno-network"
-	DEFAULT_NETWORK_BRIDGE_NAME string = "sno-bridge"
-	DEFAULT_NETWORK_CIDR        string = "192.168.126.0/24"
-	DEFAULT_DOMAIN              string = "sno.rhlocal.com"
+	DEFAULT_NETWORK_NAME             string = "sno-network"
+	DEFAULT_NETWORK_BRIDGE_NAME      string = "sno-bridge"
+	DEFAULT_MACHINE_CIDR             string = "192.168.126.0/24"
+	DEFAULT_DOMAIN                   string = "sno.rhlocal.com"
+	DEFAULT_HOST_IP                  string = "192.168.126.10"
+	DEFAULT_CLUSTER_NETWORK_CIDR     string = "10.128.0.0/14"
+	DEFAULT_CLUSTER_SVC_NETWORK_CIDR string = "172.30.0.0/16"
 )
 
 func GetDefaultVirtualMachineNetworkSpec() *VirtualMachineNetworkSpec {
-	prefix, _ := getNetworkPrefixFromCIDR(DEFAULT_NETWORK_CIDR)
-
 	spec := &VirtualMachineNetworkSpec{
-		Name:       DEFAULT_NETWORK_NAME,
-		UUID:       uuid.NewString(),
-		BridgeName: DEFAULT_NETWORK_BRIDGE_NAME,
-		MacAddress: getRandomMacAddress(),
-		CIDR:       DEFAULT_NETWORK_CIDR,
-		Domain:     DEFAULT_DOMAIN,
-		prefix:     prefix,
+		Name:                  DEFAULT_NETWORK_NAME,
+		UUID:                  uuid.NewString(),
+		BridgeName:            DEFAULT_NETWORK_BRIDGE_NAME,
+		MacAddress:            getRandomMacAddress(),
+		CIDR:                  DEFAULT_MACHINE_CIDR,
+		Domain:                DEFAULT_DOMAIN,
+		ClusterNetworkCIDR:    DEFAULT_CLUSTER_NETWORK_CIDR,
+		ClusterSvcNetworkCIDR: DEFAULT_CLUSTER_SVC_NETWORK_CIDR,
 	}
 
 	spec.genAdditionalFields()
