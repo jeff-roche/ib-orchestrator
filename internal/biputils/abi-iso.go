@@ -5,13 +5,12 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"snoman/internal/logger"
 )
 
 const installer_image_override_env = "OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE"
 
 func GenerateIso(spec *BootstrapInPlaceIsoSpec, workdir string) error {
-	if err := spec.fillAndValidateIsoGenFields(); err != nil {
+	if err := spec.FillAndValidateIsoGenFields(); err != nil {
 		return fmt.Errorf("unable to validate the required fields for iso generation: %w", err)
 	}
 
@@ -50,13 +49,9 @@ func GenerateIso(spec *BootstrapInPlaceIsoSpec, workdir string) error {
 	isoGenCmd := exec.Command(spec.AbiPath, args...)
 	isoGenCmd.Env = append(os.Environ(), fmt.Sprintf("%s=%s", installer_image_override_env, spec.ReleaseImage))
 
-	out, err := isoGenCmd.CombinedOutput()
+	_, err = isoGenCmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("error running the agent based installer: %w", err)
-	}
-
-	if err := logger.WriteLogFile(out, workdir, "openshift-install-create-image.log"); err != nil {
-		return fmt.Errorf("unable to write openshift-install logs: %w", err)
 	}
 
 	return nil

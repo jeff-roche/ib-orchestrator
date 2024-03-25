@@ -3,6 +3,8 @@ package biputils
 import (
 	"fmt"
 	vmutils "snoman/internal/vms/utils"
+
+	"gopkg.in/yaml.v2"
 )
 
 type BootstrapInPlaceIsoSpec struct {
@@ -24,7 +26,7 @@ const (
 )
 
 // fillAndValidateIsoGenFields will populate any needed empty fields with defaults and then validate the struct
-func (spec *BootstrapInPlaceIsoSpec) fillAndValidateIsoGenFields() error {
+func (spec *BootstrapInPlaceIsoSpec) FillAndValidateIsoGenFields() error {
 	// If an ISO path was given, we don't need anything else
 	if spec.IsoPath != "" {
 		if err := vmutils.SpecValidator.Struct(spec); err != nil {
@@ -41,24 +43,46 @@ func (spec *BootstrapInPlaceIsoSpec) fillAndValidateIsoGenFields() error {
 
 	// The release image is used by ABI to generate the ISO
 	if spec.ReleaseImage == "" {
-		// We only need version and arch if the release image was not pre-defined by the user
-		ver := spec.OpenshiftVersion
-		arch := spec.OpenshiftArch
-
-		if ver == "" {
-			ver = DEFAULT_OPENSHIFT_VERSION
+		if spec.OpenshiftVersion == "" {
+			spec.OpenshiftVersion = DEFAULT_OPENSHIFT_VERSION
 		}
 
-		if arch == "" {
-			arch = DEFAULT_OPENSHIFT_ARCH
+		if spec.OpenshiftArch == "" {
+			spec.OpenshiftArch = DEFAULT_OPENSHIFT_ARCH
 		}
 
-		spec.ReleaseImage = fmt.Sprintf("%s:%s-%s", DEFAULT_RELEASE_IMAGE, ver, arch)
+		spec.ReleaseImage = fmt.Sprintf("%s:%s-%s", DEFAULT_RELEASE_IMAGE, spec.OpenshiftVersion, spec.OpenshiftArch)
 	}
 
 	// Validate the fields that exist
 	if err := vmutils.SpecValidator.Struct(spec); err != nil {
 		return fmt.Errorf("unable to validate VirtualMachineSpec: %w", err)
+	}
+
+	return nil
+}
+
+func (spec *BootstrapInPlaceIsoSpec) MarshalYAML() (string, error) {
+	if err := spec.FillAndValidateIsoGenFields(); err != nil {
+		return "", err
+	}
+
+	data, err := yaml.Marshal(spec)
+	if err != nil {
+		return "", err
+	}
+
+	return string(data), nil
+}
+
+func (spec *BootstrapInPlaceIsoSpec) UnmarshalYAML(yamlData []byte) error {
+	err := yaml.Unmarshal(yamlData, spec)
+	if err != nil {
+		return fmt.Errorf("unable to parse the spec: %w", err)
+	}
+
+	if err := spec.FillAndValidateIsoGenFields(); err != nil {
+		return err
 	}
 
 	return nil
